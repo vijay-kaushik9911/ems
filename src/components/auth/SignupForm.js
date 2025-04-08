@@ -7,7 +7,7 @@ export default function SignupForm({ onSubmit }) {
     name: '',
     email: '',
     password: '',
-    employeeId: ''
+    empId: ''
   });
 
   const handleChange = (e) => {
@@ -92,21 +92,19 @@ export default function SignupForm({ onSubmit }) {
           />
         </div>
 
-        {isEmployee && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Employee ID
-            </label>
-            <input
-              name="employeeId"
-              type="text"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              value={formData.employeeId}
-              onChange={handleChange}
-            />
-          </div>
-        )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {isEmployee ? 'Employee' : 'Lead'} ID
+          </label>
+          <input
+            name="empId"
+            type="text"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            value={formData.empId}
+            onChange={handleChange}
+          />
+        </div>
 
         <button 
           type="submit" 

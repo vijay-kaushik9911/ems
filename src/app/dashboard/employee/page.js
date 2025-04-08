@@ -13,7 +13,9 @@ export default function EmployeeDashboard() {
     }
   }, [currentUser, isEmployee, loading, router]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading || (!currentUser || !isEmployee)) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">

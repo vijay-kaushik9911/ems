@@ -13,7 +13,7 @@ export default function SignupPage() {
         data.password,
         {
           name: data.name,
-          employeeId: data.employeeId,
+          employeeId: data.empId,
           role: isEmployee ? 'employee' : 'lead'
         }
       );
