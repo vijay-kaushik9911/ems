@@ -14,7 +14,7 @@ export function LeadSidebar() {
             <span>Dashboard</span>
           </Link>
           <Link
-            href="../assignedtasks"
+            href="../../assignedtasks"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           >
             <CheckSquare className="h-4 w-4" />
@@ -28,7 +28,7 @@ export function LeadSidebar() {
             <span>Analytics</span>
           </Link>
           <Link
-            href="#"
+            href="../../create"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           >
             <Users className="h-4 w-4" />
