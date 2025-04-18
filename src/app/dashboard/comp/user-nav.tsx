@@ -12,6 +12,19 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu"
 
+import { logout } from "@/firebase/auth"
+
+const handleLogOut = () => {
+  try {
+    logout();
+    window.location.href = "/"
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
+
+
+
 export function UserNav() {
   return (
     <DropdownMenu>
@@ -37,7 +50,7 @@ export function UserNav() {
           <DropdownMenuItem>Settings</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Log out</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogOut}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -5,7 +5,7 @@ import { DashboardNav } from "../dashboard/comp/dashboard-nav"
 import { TasksSkeleton } from "../dashboard/comp/skeletons"
 import { ErrorBoundary } from "../dashboard/comp/error-boundary"
 
-export default function TasksPage() {
+export default function AllTasks() {
   return (
     <div className="flex min-h-screen flex-col">
       <DashboardHeader />
