@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import Dashboard from "@/components/dashboard"
-import { DashboardSkeleton } from "@/components/skeletons"
+import { DashboardSkeleton } from "@/app/dashboard/comp/skeletons"
 import { ErrorBoundary } from "@/components/error-boundary"
 
 export default function Home() {

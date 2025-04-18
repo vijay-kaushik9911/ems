@@ -1,5 +1,5 @@
 'use client';
-import { useAuth } from '@/firebase/authContext';
+import { useAuth } from '../../../firebase/authContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { DashboardHeader } from '../comp/dashboard-header';

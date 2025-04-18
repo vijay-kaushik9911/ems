@@ -5,7 +5,7 @@ import { RecentSales } from "@/components/recent-sales"
 import { StatusCheck } from "@/components/status-check"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardNav } from "@/components/dashboard-nav"
-import { OverviewSkeleton, RecentSalesSkeleton } from "@/components/skeletons"
+import { OverviewSkeleton, RecentSalesSkeleton } from "@/app/dashboard/comp/skeletons"
 
 export default function Dashboard() {
   return (

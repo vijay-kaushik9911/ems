@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { BarChart3, Users, Package, Settings, LayoutDashboard } from "lucide-react"
+import { BarChart3, Users, Package, Settings, LayoutDashboard, CheckSquare } from "lucide-react"
 
 export function DashboardNav() {
   return (
@@ -14,6 +14,13 @@ export function DashboardNav() {
             <span>Dashboard</span>
           </Link>
           <Link
+            href="../alltasks"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          >
+            <CheckSquare className="h-4 w-4" />
+            <span>Tasks</span>
+          </Link>
+          <Link
             href="#"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           >
@@ -25,22 +32,16 @@ export function DashboardNav() {
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           >
             <Users className="h-4 w-4" />
-            <span>All Tasks</span>
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          >
-            <Package className="h-4 w-4" />
             <span>Notifications</span>
           </Link>
           <Link
             href="#"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           >
-            <Settings className="h-4 w-4" />
+            <Package className="h-4 w-4" />
             <span>Settings</span>
           </Link>
+
         </nav>
       </div>
     </div>
