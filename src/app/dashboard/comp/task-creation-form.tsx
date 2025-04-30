@@ -4,17 +4,19 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "components/ui/card"
+import { Button } from "components/ui/button"
+import { Input } from "components/ui/input"
+import { Label } from "components/ui/label"
+import { Textarea } from "components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "components/ui/select"
 import { CalendarIcon, Loader2 } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover"
 import { format } from "date-fns"
 import { cn } from "./utils"
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from "@/firebase/firebaseConfig"
 
 // Mock data for employees
 const employees = [
@@ -23,17 +25,14 @@ const employees = [
   { id: "emp-003", name: "Michael Brown" },
   { id: "emp-004", name: "Emily Davis" },
   { id: "emp-005", name: "Robert Wilson" },
-]
+];
 
-// Categories
-const categories = ["Development", "Design", "Business", "Legal", "Marketing", "Research"]
-
-// Statuses
-const statuses = ["Pending", "In Progress", "Completed"]
+const categories = ["Development", "Design", "Business", "Legal", "Marketing", "Research"];
+const statuses = ["Pending", "In Progress", "Completed", "Overdue"];
 
 export function TaskCreationForm() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -41,37 +40,41 @@ export function TaskCreationForm() {
     category: "",
     status: "Pending",
     dueDate: new Date(),
-  })
+    createdAt: new Date(), // Adding creation timestamp
+  });
 
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      setFormData((prev) => ({ ...prev, dueDate: date }))
+      setFormData((prev) => ({ ...prev, dueDate: date }));
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      // In a real app, you would send this data to your API
-      console.log("Submitting task:", formData)
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Add task to Firestore
+      const tasksCollection = collection(db, 'tasks');
+      await addDoc(tasksCollection, {
+        ...formData,
+        dueDate: formData.dueDate.toISOString(), // Convert Date to string for Firestore
+        createdAt: new Date().toISOString(), // Add current timestamp
+      });
 
       // Redirect to assigned tasks page after successful creation
-      router.push("/tasks/assigned")
+      router.push("/assignedtasks");
     } catch (error) {
-      console.error("Error creating task:", error)
+      console.error("Error creating task:", error);
+      // You might want to add error handling for the user here
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit}>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,63 +10,8 @@ import { Calendar, User, Edit, Plus } from "lucide-react"
 import { format } from "date-fns"
 import { useRouter } from "next/navigation"
 import { TaskEditDialog } from "./task-edit-dialog"
-
-// Mock data for tasks assigned by the current lead
-const assignedTasks = [
-  {
-    id: "TASK-2001",
-    title: "Implement new authentication flow",
-    assignedTo: "John Smith",
-    assignedToId: "emp-001",
-    category: "Development",
-    status: "In Progress",
-    dueDate: new Date("2025-04-25"),
-    description: "Create a new authentication flow using OAuth 2.0 and implement it in the frontend and backend.",
-  },
-  {
-    id: "TASK-2002",
-    title: "Design new landing page",
-    assignedTo: "Sarah Johnson",
-    assignedToId: "emp-002",
-    category: "Design",
-    status: "Pending",
-    dueDate: new Date("2025-04-30"),
-    description: "Create a modern, responsive landing page design that highlights our key features and benefits.",
-  },
-  {
-    id: "TASK-2003",
-    title: "Fix payment processing bug",
-    assignedTo: "Michael Brown",
-    assignedToId: "emp-003",
-    category: "Development",
-    status: "Completed",
-    dueDate: new Date("2025-04-15"),
-    description:
-      "Investigate and fix the bug in the payment processing system that causes transactions to fail occasionally.",
-  },
-  {
-    id: "TASK-2004",
-    title: "Create Q2 marketing plan",
-    assignedTo: "Emily Davis",
-    assignedToId: "emp-004",
-    category: "Marketing",
-    status: "In Progress",
-    dueDate: new Date("2025-04-28"),
-    description:
-      "Develop a comprehensive marketing plan for Q2 including social media, email campaigns, and content strategy.",
-  },
-  {
-    id: "TASK-2005",
-    title: "Update terms of service",
-    assignedTo: "Robert Wilson",
-    assignedToId: "emp-005",
-    category: "Legal",
-    status: "Pending",
-    dueDate: new Date("2025-05-10"),
-    description:
-      "Review and update our terms of service to comply with new regulations and protect our business interests.",
-  },
-]
+import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore"
+import { db } from "@/firebase/firebaseConfig"
 
 // Category colors
 const categoryColors: Record<string, string> = {
@@ -83,20 +28,70 @@ const statusColors: Record<string, string> = {
   Completed: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
   "In Progress": "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
   Pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100",
+  Overdue: "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100",
 }
 
 export function AssignedTasksView() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("All")
-  const [selectedTask, setSelectedTask] = useState<(typeof assignedTasks)[0] | null>(null)
+  const [selectedTask, setSelectedTask] = useState<any>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [tasks, setTasks] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
+  // Helper function to safely convert Firestore dates
+  const convertFirestoreDate = (date: any): Date => {
+    if (!date) return new Date()
+    
+    // If it's a Firestore Timestamp
+    if (typeof date.toDate === 'function') {
+      return date.toDate()
+    }
+    
+    // If it's already a Date object
+    if (date instanceof Date) {
+      return date
+    }
+    
+    // If it's an ISO string
+    if (typeof date === 'string') {
+      return new Date(date)
+    }
+    
+    // Fallback to current date
+    return new Date()
+  }
+
+  // Fetch tasks from Firebase
+  useEffect(() => {
+    const q = query(collection(db, "tasks"))
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const tasksData = querySnapshot.docs.map((doc) => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          title: data.title || "Untitled Task",
+          assignedTo: data.assignee || "Unassigned",
+          assignedToId: data.assigneeId || "",
+          category: data.category || "Uncategorized",
+          status: data.status || "Pending",
+          dueDate: convertFirestoreDate(data.dueDate),
+          description: data.description || "",
+          createdAt: convertFirestoreDate(data.createdAt),
+        }
+      })
+      setTasks(tasksData)
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [])
   // Get unique categories for filter
-  const categories = ["All", ...Array.from(new Set(assignedTasks.map((task) => task.category)))]
+  const categories = ["All", ...Array.from(new Set(tasks.map((task) => task.category)))]
 
   // Filter tasks based on search query and category
-  const filteredTasks = assignedTasks.filter((task) => {
+  const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -106,18 +101,35 @@ export function AssignedTasksView() {
     return matchesSearch && matchesCategory
   })
 
-  const handleTaskClick = (task: (typeof assignedTasks)[0]) => {
+  const handleTaskClick = (task: any) => {
     setSelectedTask(task)
     setIsEditDialogOpen(true)
   }
 
-  const handleTaskUpdate = (updatedTask: (typeof assignedTasks)[0]) => {
-    // In a real app, you would update the task in your database
-    console.log("Task updated:", updatedTask)
-    setIsEditDialogOpen(false)
+  const handleTaskUpdate = async (updatedTask: any) => {
+    try {
+      const taskRef = doc(db, "tasks", updatedTask.id)
+      await updateDoc(taskRef, {
+        title: updatedTask.title,
+        status: updatedTask.status,
+        category: updatedTask.category,
+        assignee: updatedTask.assignedTo,
+        assigneeId: updatedTask.assignedToId,
+        dueDate: updatedTask.dueDate,
+        description: updatedTask.description,
+      })
+      setIsEditDialogOpen(false)
+    } catch (error) {
+      console.error("Error updating task:", error)
+    }
+  }
 
-    // For demo purposes, we'll just close the dialog
-    // In a real app, you would refresh the task list or update it in state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <p>Loading tasks...</p>
+      </div>
+    )
   }
 
   return (

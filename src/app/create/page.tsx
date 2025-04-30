@@ -4,7 +4,7 @@ import { TaskCreationForm } from "../dashboard/comp/task-creation-form"
 
 export default function CreateTaskPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex w-full flex-col">
       <DashboardHeader />
       <div className="flex flex-1">
         <LeadSidebar />

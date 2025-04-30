@@ -1,80 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Badge } from "components/ui/badge"
 import { Input } from "components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select"
 import { Calendar, User } from "lucide-react"
 import { format } from "date-fns"
-
-// Mock data for tasks
-const tasks = [
-  {
-    id: "TASK-1001",
-    title: "Update dashboard analytics",
-    assignedBy: "John Smith",
-    category: "Development",
-    status: "In Progress",
-    dueDate: new Date("2025-04-20"),
-  },
-  {
-    id: "TASK-1002",
-    title: "Create new user onboarding flow",
-    assignedBy: "Sarah Johnson",
-    category: "Design",
-    status: "Pending",
-    dueDate: new Date("2025-04-25"),
-  },
-  {
-    id: "TASK-1003",
-    title: "Fix payment gateway integration",
-    assignedBy: "Michael Brown",
-    category: "Development",
-    status: "Completed",
-    dueDate: new Date("2025-04-10"),
-  },
-  {
-    id: "TASK-1004",
-    title: "Prepare quarterly report",
-    assignedBy: "Emily Davis",
-    category: "Business",
-    status: "In Progress",
-    dueDate: new Date("2025-04-30"),
-  },
-  {
-    id: "TASK-1005",
-    title: "Update privacy policy",
-    assignedBy: "Robert Wilson",
-    category: "Legal",
-    status: "Pending",
-    dueDate: new Date("2025-05-05"),
-  },
-  {
-    id: "TASK-1006",
-    title: "Optimize database queries",
-    assignedBy: "Jennifer Lee",
-    category: "Development",
-    status: "In Progress",
-    dueDate: new Date("2025-04-22"),
-  },
-  {
-    id: "TASK-1007",
-    title: "Create marketing materials",
-    assignedBy: "David Miller",
-    category: "Marketing",
-    status: "Completed",
-    dueDate: new Date("2025-04-15"),
-  },
-  {
-    id: "TASK-1008",
-    title: "Conduct user testing",
-    assignedBy: "Lisa Anderson",
-    category: "Research",
-    status: "Pending",
-    dueDate: new Date("2025-04-28"),
-  },
-]
+import { useAuth } from "../../../firebase/authContext"
+import { collection, query, where, onSnapshot } from "firebase/firestore"
+import { db } from "@/firebase/firebaseConfig"
 
 // Category colors
 const categoryColors: Record<string, string> = {
@@ -91,11 +26,44 @@ const statusColors: Record<string, string> = {
   Completed: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
   "In Progress": "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
   Pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100",
+  Overdue: "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100",
 }
 
 export function TasksView() {
+  const { currentUser } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("All")
+  const [tasks, setTasks] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch tasks assigned to current employee
+  useEffect(() => {
+    if (!currentUser?.uid) return
+
+    const q = query(
+      collection(db, "tasks"),
+      where("assigneeId", "==", currentUser.uid)
+    )
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const tasksData = querySnapshot.docs.map((doc) => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          title: data.title || "Untitled Task",
+          assignedBy: data.assignedBy || "Unknown",
+          category: data.category || "Uncategorized",
+          status: data.status || "Pending",
+          dueDate: data.dueDate?.toDate() || new Date(),
+          description: data.description || "",
+        }
+      })
+      setTasks(tasksData)
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [currentUser?.uid])
 
   // Get unique categories for filter
   const categories = ["All", ...Array.from(new Set(tasks.map((task) => task.category)))]
@@ -109,6 +77,14 @@ export function TasksView() {
 
     return matchesSearch && matchesCategory
   })
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <p>Loading tasks...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">

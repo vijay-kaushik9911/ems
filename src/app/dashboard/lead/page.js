@@ -23,7 +23,7 @@ export default function EmployeeDashboard() {
   if (loading || !currentUser || !isLead) return null;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex w-full flex-col">
       <DashboardHeader />
       <div className="flex flex-1">
         <LeadSidebar />
