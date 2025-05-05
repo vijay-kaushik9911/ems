@@ -10,17 +10,17 @@ export function DashboardNav() {
   const navItems = [
     { 
       name: "Dashboard", 
-      path: "/dashboard/employee", 
+      path: "/employee/dashboard", 
       icon: <LayoutDashboard className="h-4 w-4" /> 
     },
     { 
       name: "Tasks", 
-      path: "/alltasks", 
+      path: "/employee/tasks", 
       icon: <CheckSquare className="h-4 w-4" /> 
     },
     { 
       name: "Analytics", 
-      path: "#1", 
+      path: "/employee/analytics", 
       icon: <BarChart3 className="h-4 w-4" /> 
     },
     { 

@@ -3,7 +3,7 @@ import type React from "react"
 import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "../firebase/authContext"
-import { Providers } from "./providers"
+import { Providers } from "./lib/providers"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

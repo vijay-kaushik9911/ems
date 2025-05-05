@@ -15,7 +15,7 @@ export default function EmployeeLogin() {
         console.error('Login error:', error);
         // Handle error (show toast/notification)
       } else {
-        router.push('/dashboard/employee');
+        router.push('/employee/dashboard');
       }
     } catch (error) {
       console.error('Login error:', error);

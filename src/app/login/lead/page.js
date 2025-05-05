@@ -15,7 +15,7 @@ export default function LeadLogin() {
       // Handle error (show toast/notification)
     } else {
       // Redirect to lead dashboard
-      router.push('/dashboard/lead');
+      router.push('/lead/dashboard');
     }
   };
 

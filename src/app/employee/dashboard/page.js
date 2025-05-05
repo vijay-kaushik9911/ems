@@ -1,32 +1,31 @@
 'use client';
-import { useAuth } from '../../../firebase/authContext';
+import { useAuth } from '@/firebase/authContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
-import { DashboardHeader } from '../comp/dashboard-header';
-import { LeadSidebar } from '../comp/lead-sidebar';
+import { DashboardHeader } from '@/app/dashboard/comp/dashboard-header';
+import { DashboardNav } from 'app/dashboard/comp/dashboard-nav';
 import {
   Card, CardHeader, CardTitle,
   CardContent, CardDescription
-} from '../../../components/ui/card';
-import { Sidebar } from 'lucide-react';
+} from '@/components/ui/card';
 
 export default function EmployeeDashboard() {
-  const { currentUser, isLead, loading } = useAuth();
+  const { currentUser, isEmployee, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!currentUser || !isLead)) {
-      router.push('/login/lead');
+    if (!loading && (!currentUser || !isEmployee)) {
+      router.push('/login/employee');
     }
-  }, [currentUser, isLead, loading, router]);
+  }, [currentUser, isEmployee, loading, router]);
 
-  if (loading || !currentUser || !isLead) return null;
+  if (loading || !currentUser || !isEmployee) return null;
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex min-h-screen flex-col w-full">
       <DashboardHeader />
       <div className="flex flex-1">
-        <LeadSidebar />
+        <DashboardNav />
         <div className="flex-1 space-y-4 p-8 pt-6">
           <div className="flex items-center justify-between space-y-2">
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -36,10 +35,10 @@ export default function EmployeeDashboard() {
             <Suspense fallback={<Card><CardContent>Loading Pending...</CardContent></Card>}>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium"> 🔢 Total Tasks Assigned</CardTitle>
+                  <CardTitle className="text-sm font-medium">Pending</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">35</div>
+                  <div className="text-2xl font-bold">$45,231.89</div>
                   <p className="text-xs text-muted-foreground">+20.1% from last month</p>
                 </CardContent>
               </Card>
@@ -48,10 +47,10 @@ export default function EmployeeDashboard() {
             <Suspense fallback={<Card><CardContent>Loading In Progress...</CardContent></Card>}>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">✅ Completed Tasks</CardTitle>
+                  <CardTitle className="text-sm font-medium">In Progress</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">26</div>
+                  <div className="text-2xl font-bold">+2350</div>
                   <p className="text-xs text-muted-foreground">+180.1% from last month</p>
                 </CardContent>
               </Card>
@@ -60,10 +59,10 @@ export default function EmployeeDashboard() {
             <Suspense fallback={<Card><CardContent>Loading Completed...</CardContent></Card>}>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">⏳ Tasks In Progress</CardTitle>
+                  <CardTitle className="text-sm font-medium">Completed</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">9</div>
+                  <div className="text-2xl font-bold">+12,234</div>
                   <p className="text-xs text-muted-foreground">+19% from last month</p>
                 </CardContent>
               </Card>
@@ -72,10 +71,10 @@ export default function EmployeeDashboard() {
             <Suspense fallback={<Card><CardContent>Loading Overdue...</CardContent></Card>}>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">❗ Overdue Tasks</CardTitle>
+                  <CardTitle className="text-sm font-medium">Overdue</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">2</div>
+                  <div className="text-2xl font-bold">+573</div>
                   <p className="text-xs text-muted-foreground">+201 since last hour</p>
                 </CardContent>
               </Card>

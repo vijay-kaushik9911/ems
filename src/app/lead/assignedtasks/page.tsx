@@ -1,9 +1,9 @@
-import { DashboardHeader } from "../dashboard/comp/dashboard-header"
-import { LeadSidebar } from "../dashboard/comp/lead-sidebar"
-import { AssignedTasksView } from "../dashboard/comp/assigned-tasks-view"
+import { DashboardHeader } from "../../dashboard/comp/dashboard-header"
+import { LeadSidebar } from "../../dashboard/comp/lead-sidebar"
+import { AssignedTasksView } from "../../dashboard/comp/assigned-tasks-view"
 import { Suspense } from "react"
-import { TasksSkeleton } from "../dashboard/comp/skeletons"
-import { ErrorBoundary } from "../dashboard/comp/error-boundary"
+import { TasksSkeleton } from "../../dashboard/comp/skeletons"
+import { ErrorBoundary } from "../../dashboard/comp/error-boundary"
 
 export default function AssignedTasksPage() {
   return (

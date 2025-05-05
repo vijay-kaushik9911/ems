@@ -1,9 +1,9 @@
 import { Suspense } from "react"
-import { TasksView } from "../dashboard/comp/Tasksview"
-import { DashboardHeader } from "../dashboard/comp/dashboard-header"
-import { DashboardNav } from "../dashboard/comp/dashboard-nav"
-import { TasksSkeleton } from "../dashboard/comp/skeletons"
-import { ErrorBoundary } from "../dashboard/comp/error-boundary"
+import { TasksView } from "../../dashboard/comp/Tasksview"
+import { DashboardHeader } from "../../dashboard/comp/dashboard-header"
+import { DashboardNav } from "../../dashboard/comp/dashboard-nav"
+import { TasksSkeleton } from "../../dashboard/comp/skeletons"
+import { ErrorBoundary } from "../../dashboard/comp/error-boundary"
 
 export default function AllTasks() {
   return (
