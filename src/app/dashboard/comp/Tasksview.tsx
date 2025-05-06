@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Calendar, User } from "lucide-react"
 import { format } from "date-fns"
 import { useAuth } from "../../../firebase/authContext"
-import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore"
+import { collection, query, where, onSnapshot, orderBy, updateDoc } from "firebase/firestore"
 import { db } from "@/firebase/firebaseConfig"
 import { Button } from "@/components/ui/button"
-import {doc, getDoc, Timestamp } from 'firebase/firestore'
+import {doc, getDoc, getDocs, Timestamp } from 'firebase/firestore'
+import {ShowTask} from "./show-task"
+import { date } from "zod"
 
 // Category colors
 const categoryColors: Record<string, string> = {
@@ -41,6 +43,33 @@ export function TasksView() {
   const [error, setError] = useState<string | null>(null)
   const [indexBuilding, setIndexBuilding] = useState(false)
   const [employeeId, setEmployeeId] = useState("")
+  const [userNames, setUserNames] = useState<Record<string, string>>({})
+  const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchLeadUsers = async () => {
+      const q = query(collection(db, "users"), where("role", "==", "lead"))
+      const snapshot = await getDocs(q)
+  
+      const map: Record<string, string> = {}
+      snapshot.forEach((doc) => {
+        const data = doc.data()
+        map[doc.id] = data.name || "Unnamed"
+      })
+  
+      setUserNames(map)
+    }
+
+  
+    fetchLeadUsers()
+    console.log(currentUser)
+    console.log("before")
+    console.log(userNames)
+    console.log("after")
+
+  }, [])
+  
 
   useEffect(() => {
     if (!currentUser?.uid) return
@@ -52,6 +81,7 @@ export function TasksView() {
   
         if (userSnap.exists()) {
           const data = userSnap.data()
+          console.log(data.employeeId)
           setEmployeeId(data.employeeId || "") // You'll need a useState hook for this
         } else {
           setError("User not found")
@@ -71,7 +101,7 @@ export function TasksView() {
     try {
       const q = query(
         collection(db, "tasks"),
-        where("assignee", "==", employeeId),
+        where("assignedTo", "==", employeeId),
         orderBy("dueDate", "asc")
       )
   
@@ -92,13 +122,14 @@ export function TasksView() {
   
             return {
               id: doc.id,
+              taskId: data.taskId,
               title: data.title || "Untitled Task",
               assignedBy: data.assignedBy || "Unknown",
               category: data.category || "Uncategorized",
               status,
               dueDate,
               description: data.description || "",
-              priority: data.priority || "Medium",
+              // priority: data.priority || "Medium",
             }
           })
           setTasks(tasksData)
@@ -107,6 +138,7 @@ export function TasksView() {
           setIndexBuilding(false)
         },
         (error) => {
+          console.log(error)
           if (error.code === 'failed-precondition') {
             setIndexBuilding(true)
           }
@@ -121,8 +153,26 @@ export function TasksView() {
       setLoading(false)
     }
   }, [employeeId]) // ← Use employeeId here
-  
 
+  const handleTaskClick = (task: any) => {
+    setSelectedTask(task)
+    setIsEditDialogOpen(true)
+  }
+
+   const handleTaskUpdate = async (updatedTask: any) => {
+      try {
+        const taskRef = doc(db, "tasks", updatedTask.id)
+        await updateDoc(taskRef, {
+          status: updatedTask.status,
+          // lastUpdate: new date()
+        })
+        setIsEditDialogOpen(false)
+      } catch (error) {
+        console.error("Error updating task:", error)
+      }
+    }
+  
+  
   // Get unique categories for filter
   const categories = ["All", ...Array.from(new Set(tasks.map((task) => task.category)))]
   const statuses = ["All", ...Array.from(new Set(tasks.map((task) => task.status)))]
@@ -212,11 +262,13 @@ export function TasksView() {
 
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {filteredTasks.map((task) => (
-          <Card key={task.id} className="overflow-hidden hover:shadow-md transition-shadow">
+          <Card key={task.id} 
+          onClick={() => handleTaskClick(task)}
+          className="overflow-hidden hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-sm text-muted-foreground font-mono">{task.id}</div>
+                  <div className="text-sm text-muted-foreground font-mono">{task.taskId}</div>
                   <CardTitle className="mt-1 text-xl">{task.title}</CardTitle>
                 </div>
                 <Badge className={statusColors[task.status]}>{task.status}</Badge>
@@ -225,8 +277,8 @@ export function TasksView() {
             <CardContent className="pb-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <User className="h-4 w-4" />
-                <span>Assigned by: {task.assignedBy}</span>
-              </div>
+                <span>Assigned by: {userNames[task.assignedBy] || "Loading..."}</span>
+                </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                 <Calendar className="h-4 w-4" />
                 <span>Due: {format(task.dueDate, "MMM d, yyyy")}</span>
@@ -259,6 +311,16 @@ export function TasksView() {
           )}
         </div>
       )}
+
+      {selectedTask && (
+              <ShowTask
+                task={selectedTask}
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+                onUpdate={handleTaskUpdate}
+                userNames={userNames}
+              />
+            )}
     </div>
   )
 }

@@ -4,6 +4,8 @@ import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "../firebase/authContext"
 import { Providers } from "./lib/providers"
+import "react-day-picker/dist/style.css";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

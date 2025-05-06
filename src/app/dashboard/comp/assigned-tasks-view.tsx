@@ -71,9 +71,10 @@ export function AssignedTasksView() {
         const data = doc.data()
         return {
           id: doc.id,
+          taskId: data.taskId,
           title: data.title || "Untitled Task",
-          assignedTo: data.assignee || "Unassigned",
-          assignedToId: data.assigneeId || "",
+          assignedTo: data.assignedTo || "Unassigned",
+          // assignedToId: data.assigneeId || "",
           category: data.category || "Uncategorized",
           status: data.status || "Pending",
           dueDate: convertFirestoreDate(data.dueDate),
@@ -111,10 +112,11 @@ export function AssignedTasksView() {
       const taskRef = doc(db, "tasks", updatedTask.id)
       await updateDoc(taskRef, {
         title: updatedTask.title,
+        taskId: updatedTask.taskId,
         status: updatedTask.status,
         category: updatedTask.category,
-        assignee: updatedTask.assignedTo,
-        assigneeId: updatedTask.assignedToId,
+        assignedTo: updatedTask.assignedTo,
+        // assigneeId: updatedTask.assignedToId,
         dueDate: updatedTask.dueDate,
         description: updatedTask.description,
       })
@@ -155,7 +157,7 @@ export function AssignedTasksView() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => router.push("/create")} className="whitespace-nowrap">
+        <Button onClick={() => router.push("/lead/create")} className="whitespace-nowrap">
           <Plus className="mr-2 h-4 w-4" /> Create Task
         </Button>
       </div>
@@ -170,7 +172,7 @@ export function AssignedTasksView() {
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-sm text-muted-foreground font-mono">{task.id}</div>
+                  <div className="text-sm text-muted-foreground font-mono">{task.taskId}</div>
                   <CardTitle className="mt-1 text-xl">{task.title}</CardTitle>
                 </div>
                 <Badge className={statusColors[task.status]}>{task.status}</Badge>

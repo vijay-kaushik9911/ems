@@ -2,30 +2,32 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "components/ui/card"
-import { Button } from "components/ui/button"
-import { Input } from "components/ui/input"
-import { Label } from "components/ui/label"
-import { Textarea } from "components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "components/ui/select"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, Loader2 } from "lucide-react"
-import { Calendar } from "components/ui/calendar"
+import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover"
 import { format } from "date-fns"
 import { cn } from "./utils"
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from "@/firebase/firebaseConfig"
+import { useAuth } from "@/firebase/authContext"
+
 
 // Mock data for employees
-const employees = [
-  { id: "emp-001", name: "John Smith" },
-  { id: "emp-002", name: "Sarah Johnson" },
-  { id: "emp-003", name: "Michael Brown" },
-  { id: "emp-004", name: "Emily Davis" },
-  { id: "emp-005", name: "Robert Wilson" },
-];
+// const employees = [
+//   { id: "emp-001", name: "John Smith" },
+//   { id: "emp-002", name: "Sarah Johnson" },
+//   { id: "emp-003", name: "Michael Brown" },
+//   { id: "emp-004", name: "Emily Davis" },
+//   { id: "emp-005", name: "Robert Wilson" },
+// ];
 
 const categories = ["Development", "Design", "Business", "Legal", "Marketing", "Research"];
 const statuses = ["Pending", "In Progress", "Completed", "Overdue"];
@@ -33,15 +35,39 @@ const statuses = ["Pending", "In Progress", "Completed", "Overdue"];
 export function TaskCreationForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
+    taskId: "",
     description: "",
-    assignee: "",
+    assignedTo: "",
+    assignedBy: "",
     category: "",
     status: "Pending",
     dueDate: new Date(),
     createdAt: new Date(), // Adding creation timestamp
   });
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const q = query(collection(db, "users"), where("role", "==", "employee"));
+        const querySnapshot = await getDocs(q);
+        const employeeList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          employeeId: doc.data().employeeId,
+          name: doc.data().name || doc.data().displayName || "Unnamed",
+        }));
+        setEmployees(employeeList);
+      } catch (error) {
+        console.error("Failed to fetch employees:", error);
+      }
+    };
+  
+    fetchEmployees();
+  }, []);
+
+  const {currentUser} = useAuth();
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -53,21 +79,25 @@ export function TaskCreationForm() {
     }
   };
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
 
     try {
       // Add task to Firestore
       const tasksCollection = collection(db, 'tasks');
       await addDoc(tasksCollection, {
         ...formData,
+        assignedBy : currentUser.uid,
         dueDate: formData.dueDate.toISOString(), // Convert Date to string for Firestore
         createdAt: new Date().toISOString(), // Add current timestamp
       });
 
       // Redirect to assigned tasks page after successful creation
-      router.push("/assignedtasks");
+      router.push("/lead/assignedtasks");
     } catch (error) {
       console.error("Error creating task:", error);
       // You might want to add error handling for the user here
@@ -95,6 +125,17 @@ export function TaskCreationForm() {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="title">Task Id</Label>
+            <Input
+              id="taskId"
+              placeholder="Enter task Id"
+              value={formData.taskId}
+              onChange={(e) => handleChange("taskId", e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -107,14 +148,14 @@ export function TaskCreationForm() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="assignee">Assign To</Label>
-              <Select value={formData.assignee} onValueChange={(value) => handleChange("assignee", value)} required>
-                <SelectTrigger id="assignee">
+              <Label htmlFor="assignedTo">Assign To</Label>
+              <Select value={formData.assignedTo} onValueChange={(value) => handleChange("assignedTo", value)} required>
+                <SelectTrigger id="assignedTo">
                   <SelectValue placeholder="Select employee" />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((employee) => (
-                    <SelectItem key={employee.id} value={employee.id}>
+                    <SelectItem key={employee.employeeId} value={employee.employeeId}>
                       {employee.name}
                     </SelectItem>
                   ))}
@@ -172,7 +213,25 @@ export function TaskCreationForm() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={formData.dueDate} onSelect={handleDateChange} initialFocus />
+                <Calendar
+                  mode="single"
+                  selected={formData.dueDate}
+                  onSelect={handleDateChange}
+                  initialFocus
+                  captionLayout="dropdown"
+                  fromYear={2000}
+                  toYear={2035}
+                  showOutsideDays={false}
+                  classNames={{
+                    table: "w-full border-collapse",
+                    head_row: "flex",
+                    head_cell: "text-center text-xs font-medium text-gray-500 w-9",
+                    row: "flex w-full mt-1",
+                    cell: "h-9 w-9 text-center text-sm hover:bg-gray-100",
+                    day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
+                    nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                  }}
+                />
                 </PopoverContent>
               </Popover>
             </div>

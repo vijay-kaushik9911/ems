@@ -68,7 +68,7 @@ export default function EmployeeAnalyticsPage() {
         // Fetch tasks assigned to this employee
         const tasksQuery = query(
           collection(db, "tasks"),
-          where("assignee", "==", employeeId)
+          where("assignedTo", "==", employeeId)
         )
 
         const querySnapshot = await getDocs(tasksQuery)
@@ -90,7 +90,7 @@ export default function EmployeeAnalyticsPage() {
           const updatedAt = data.updatedAt ? new Date(data.updatedAt) : createdAt
           
           const status = data.status || "Pending"
-          const isOverdue = dueDate < now && status !== "Completed"
+          const isOverdue = (dueDate < now && status !== "Completed") || status === "Overdue"
 
           const task: Task = {
             id: doc.id,

@@ -10,12 +10,12 @@ export function LeadSidebar() {
   const navItems = [
     { 
       name: "Dashboard", 
-      path: "/dashboard/lead", 
+      path: "/lead/dashboard", 
       icon: <LayoutDashboard className="h-4 w-4" /> 
     },
     { 
       name: "Assigned Tasks", 
-      path: "/assignedtasks", 
+      path: "/lead/assignedtasks", 
       icon: <CheckSquare className="h-4 w-4" /> 
     },
     { 
@@ -25,7 +25,7 @@ export function LeadSidebar() {
     },
     { 
       name: "New Task", 
-      path: "/create", 
+      path: "/lead/create", 
       icon: <Users className="h-4 w-4" /> 
     },
     { 

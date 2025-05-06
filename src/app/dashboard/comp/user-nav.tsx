@@ -15,7 +15,7 @@ import { useAuth } from "@/firebase/authContext"
 import { logout } from "@/firebase/auth"
 
 export function UserNav() {
-  const { currentUser } = useAuth()
+  const { currentUser, userData } = useAuth()
 
   const handleLogOut = () => {
     try {
@@ -27,14 +27,13 @@ export function UserNav() {
   }
 
   // Get user initials for fallback
-  const getInitials = () => {
-    if (!currentUser?.email) return "U"
-    const [name] = currentUser.email.split("@")
+  const getInitials = (name: string) => {
+    if (!name) return "US"
     return name
-      .split(/[.\s]/)
-      .map(part => part[0]?.toUpperCase() ?? '')
+      .split(" ")
+      .map(part => part[0])
       .join("")
-      .slice(0, 2) || "U"
+      .toUpperCase()
   }
 
   return (
@@ -46,7 +45,7 @@ export function UserNav() {
               src={currentUser?.photoURL || "/placeholder.svg?height=32&width=32"} 
               alt={currentUser?.email || "user"} 
             />
-            <AvatarFallback>{getInitials()}</AvatarFallback>
+            <AvatarFallback>{userData ? getInitials(userData.name) : "U"}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -54,10 +53,10 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'User'}
+              {userData.name || currentUser?.email?.split('@')[0] || 'User'}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {currentUser?.email || "user@example.com"}
+              {userData.email || "user@example.com"}
             </p>
           </div>
         </DropdownMenuLabel>

@@ -1,6 +1,6 @@
-import { DashboardHeader } from "../dashboard/comp/dashboard-header"
-import { LeadSidebar } from "../dashboard/comp/lead-sidebar"
-import { TaskCreationForm } from "../dashboard/comp/task-creation-form"
+import { DashboardHeader } from "@/app/dashboard/comp/dashboard-header"
+import { LeadSidebar } from "@/app/dashboard/comp/lead-sidebar"
+import { TaskCreationForm } from "@/app/dashboard/comp/task-creation-form"
 
 export default function CreateTaskPage() {
   return (
