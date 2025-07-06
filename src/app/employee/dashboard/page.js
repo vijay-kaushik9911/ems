@@ -1,23 +1,45 @@
 'use client';
 import { useAuth } from '@/firebase/authContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { DashboardHeader } from '@/app/dashboard/comp/dashboard-header';
 import { DashboardNav } from 'app/dashboard/comp/dashboard-nav';
 import {
   Card, CardHeader, CardTitle,
   CardContent, CardDescription
 } from '@/components/ui/card';
+import { getTaskStatsForEmployee } from "@/app/employee/getTaskStats";
+import TaskActivityChart from "@/app/employee/TaskActivityChart"
+import UpcomingDeadlines from "@/app/employee/UpComingDeadlines"
 
 export default function EmployeeDashboard() {
   const { currentUser, isEmployee, loading } = useAuth();
   const router = useRouter();
+
+  const [taskStats, setTaskStats] = useState({
+    total: 0,
+    completed: 0,
+    inProgress: 0,
+    overdue: 0,
+    assignedThisWeek: 0,
+    completedThisWeek: 0,
+    newInProgressThisWeek: 0,
+    overdueThisWeek: 0,
+  });
 
   useEffect(() => {
     if (!loading && (!currentUser || !isEmployee)) {
       router.push('/login/employee');
     }
   }, [currentUser, isEmployee, loading, router]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const stats = await getTaskStatsForEmployee(currentUser.uid);
+      setTaskStats(stats);
+    };
+    if (currentUser?.uid) fetchStats();
+  }, [currentUser]);
 
   if (loading || !currentUser || !isEmployee) return null;
 
@@ -35,11 +57,11 @@ export default function EmployeeDashboard() {
             <Suspense fallback={<Card><CardContent>Loading Pending...</CardContent></Card>}>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                  <CardTitle className="text-sm font-medium">Total</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">$45,231.89</div>
-                  <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+                  <div className="text-2xl font-bold">{taskStats.total}</div>
+                  <p className="text-xs text-muted-foreground">+{taskStats.assignedThisWeek} this week</p>
                 </CardContent>
               </Card>
             </Suspense>
@@ -50,8 +72,8 @@ export default function EmployeeDashboard() {
                   <CardTitle className="text-sm font-medium">In Progress</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+2350</div>
-                  <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+                  <div className="text-2xl font-bold">{taskStats.inProgress}</div>
+                  <p className="text-xs text-muted-foreground">+{taskStats.newInProgressThisWeek} in progress this week</p>
                 </CardContent>
               </Card>
             </Suspense>
@@ -62,8 +84,8 @@ export default function EmployeeDashboard() {
                   <CardTitle className="text-sm font-medium">Completed</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+12,234</div>
-                  <p className="text-xs text-muted-foreground">+19% from last month</p>
+                  <div className="text-2xl font-bold">{taskStats.completed}</div>
+                  <p className="text-xs text-muted-foreground">+{taskStats.completedThisWeek} completed this week</p>
                 </CardContent>
               </Card>
             </Suspense>
@@ -74,8 +96,8 @@ export default function EmployeeDashboard() {
                   <CardTitle className="text-sm font-medium">Overdue</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+573</div>
-                  <p className="text-xs text-muted-foreground">+201 since last hour</p>
+                  <div className="text-2xl font-bold">{taskStats.overdue}</div>
+                  <p className="text-xs text-muted-foreground">+{taskStats.overdueThisWeek} overdue since this week</p>
                 </CardContent>
               </Card>
             </Suspense>
@@ -89,9 +111,7 @@ export default function EmployeeDashboard() {
                   <CardDescription>Summary of tasks completed in the last 7 days</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
-                  <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                    <span>Chart goes here (e.g., Line Chart for completed tasks)</span>
-                  </div>
+                  <TaskActivityChart />
                 </CardContent>
               </Card>
             </Suspense>
@@ -103,20 +123,7 @@ export default function EmployeeDashboard() {
                   <CardDescription>Top tasks due this week</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2">
-                    <li className="flex justify-between">
-                      <span className="font-medium">Fix Login Bug</span>
-                      <span className="text-sm text-red-500">Apr 12</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="font-medium">Update Dashboard UI</span>
-                      <span className="text-sm text-yellow-500">Apr 13</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span className="font-medium">API Integration</span>
-                      <span className="text-sm text-green-500">Apr 15</span>
-                    </li>
-                  </ul>
+                  <UpcomingDeadlines />
                 </CardContent>
               </Card>
             </Suspense>

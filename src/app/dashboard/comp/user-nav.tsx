@@ -13,9 +13,13 @@ import {
 } from "../../../components/ui/dropdown-menu"
 import { useAuth } from "@/firebase/authContext"
 import { logout } from "@/firebase/auth"
+import { useRouter } from "next/navigation"
+
 
 export function UserNav() {
   const { currentUser, userData } = useAuth()
+  const router = useRouter()
+
 
   const handleLogOut = () => {
     try {
@@ -25,6 +29,11 @@ export function UserNav() {
       console.error("Logout failed:", error)
     }
   }
+
+  const handleProfile = () => {
+    router.push("/employee/profile")
+  }
+
 
   // Get user initials for fallback
   const getInitials = (name: string) => {
@@ -53,7 +62,7 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {userData.name || currentUser?.email?.split('@')[0] || 'User'}
+              {userData?.name || currentUser?.email?.split('@')[0] || 'User'}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {userData.email || "user@example.com"}
@@ -62,7 +71,7 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleProfile}>Profile</DropdownMenuItem>
           <DropdownMenuItem>Billing</DropdownMenuItem>
           <DropdownMenuItem>Settings</DropdownMenuItem>
         </DropdownMenuGroup>

@@ -81,7 +81,7 @@ async function getTaskStatsForLead(leadId: string) {
 
 
 
-export default function EmployeeDashboard() {
+export default function LeadDashboard() {
   const { currentUser, isLead, loading } = useAuth();
   const router = useRouter();
   const [taskStats, setTaskStats] = useState({  total: 0, completed: 0, inProgress: 0, overdue: 0, assignedThisWeek: 0, completedThisWeek: 0, newInProgressThisWeek: 0, overdueThisWeek: 0, });

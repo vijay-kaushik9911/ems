@@ -30,7 +30,7 @@ export function LeadSidebar() {
     },
     { 
       name: "Settings", 
-      path: "#1", 
+      path: "/lead/profile", 
       icon: <Package className="h-4 w-4" /> 
     }
   ];
