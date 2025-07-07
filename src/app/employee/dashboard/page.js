@@ -3,7 +3,7 @@ import { useAuth } from '@/firebase/authContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { DashboardHeader } from '@/app/dashboard/comp/dashboard-header';
-import { DashboardNav } from 'app/dashboard/comp/dashboard-nav';
+import { DashboardNav } from '@/app/dashboard/comp/dashboard-nav'
 import {
   Card, CardHeader, CardTitle,
   CardContent, CardDescription

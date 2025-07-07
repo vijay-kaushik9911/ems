@@ -65,7 +65,7 @@ export function UserNav() {
               {userData?.name || currentUser?.email?.split('@')[0] || 'User'}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {userData.email || "user@example.com"}
+              {userData?.email || "user@example.com"}
             </p>
           </div>
         </DropdownMenuLabel>

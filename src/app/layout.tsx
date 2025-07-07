@@ -5,6 +5,8 @@ import "./globals.css"
 import { AuthProvider } from "../firebase/authContext"
 import { Providers } from "./lib/providers"
 import "react-day-picker/dist/style.css";
+import { Toaster } from "@/components/ui/toaster"
+
 
 
 const geistSans = Geist({
@@ -40,6 +42,7 @@ export default function RootLayout({
           <AuthProvider>
             <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
               {children}
+                <Toaster />
             </div>
           </AuthProvider>
         </Providers>
