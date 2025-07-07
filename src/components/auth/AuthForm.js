@@ -1,62 +1,70 @@
-'use client';
-import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import FormInput from './FormInput';
+'use client'
+
+import { motion } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters')
-});
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
 
-export default function AuthForm({ onSubmit, type = 'employee' }) {
+export default function AuthForm({ onSubmit, type = 'employee', isLoading = false }) {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
-    resolver: zodResolver(loginSchema)
-  });
+    resolver: zodResolver(loginSchema),
+  })
 
   return (
-    <motion.div
+    <motion.form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-md w-full space-y-8"
     >
-      <div className="text-center">
-        <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-          {type === 'employee' ? 'Employee Login' : 'Lead Login'}
-        </h2>
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="name@example.com"
+          {...register('email')}
+        />
+        {errors.email && (
+          <p className="text-sm text-red-500">{errors.email.message}</p>
+        )}
       </div>
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <div className="rounded-md shadow-sm space-y-4">
-          <FormInput
-            id="email"
-            type="email"
-            label="Email address"
-            register={register}
-            error={errors.email}
-          />
-          <FormInput
-            id="password"
-            type="password"
-            label="Password"
-            register={register}
-            error={errors.password}
-          />
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Button variant="link" className="h-auto p-0 text-xs" type="button">
+            Forgot password?
+          </Button>
         </div>
-        <div>
-          <button
-            type="submit"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Sign in
-          </button>
-        </div>
-      </form>
-    </motion.div>
-  );
+        <Input
+          id="password"
+          type="password"
+          {...register('password')}
+        />
+        {errors.password && (
+          <p className="text-sm text-red-500">{errors.password.message}</p>
+        )}
+      </div>
+
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Sign In
+      </Button>
+    </motion.form>
+  )
 }
